@@ -1,0 +1,43 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: postgres-db
+    environment:
+      POSTGRES_USER: your_db_user
+      POSTGRES_PASSWORD: your_db_password
+      POSTGRES_DB: account_manager
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+      
+
+  account-manager:
+    build: ./AccountServices
+    container_name: account-services
+    environment:
+      DATABASE_URL: postgres://your_db_user:your_db_password@postgres-db:5432/account_manager
+    ports:
+      - "3000:3000"
+    depends_on:
+      - postgres
+
+  payment-manager:
+    build: ./PaymentServices
+    container_name: payment-services
+    environment:
+      DATABASE_URL: postgres://your_db_user:your_db_password@postgres-db:5432/account_manager
+    ports:
+      - "3001:3001"
+    depends_on:
+      - postgres
+
+volumes:
+  postgres-data:
+    driver: local
+      driver_opts:
+        o: bind
+        type: none
+        device: /users/macmini/data/
